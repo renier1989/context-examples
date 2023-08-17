@@ -1,35 +1,36 @@
-/* eslint-disable react/prop-types */
-import { createContext, useContext } from "react"
+import { createContext, useContext, useState } from "react"
 
-const Contexto = createContext('valor por defecto');
-const Contexto2 = createContext('valor por defecto del segundo contexto');
+const Contexto = createContext({valor: false, toggle: ()=>{}});
 
 const MiProvider = ({children}) => {
-  return(
-    <Contexto.Provider value={'mi primer valor'}>
+  const [valor, setValor] = useState(false);
+  const value = {
+    valor,
+    toggle : ()=> setValor(!valor),
+  }
+  return (
+    <Contexto.Provider value={value}> 
       {children}
     </Contexto.Provider>
-  )
-}
-
-const Contenido = () => {
-  const ctx = useContext(Contexto);
-  return(
-    <div>{ctx}</div>
-  );
-}
-const Contenido2 = () => {
-  const ctx = useContext(Contexto2);
-  return(
-    <div>{ctx}</div>
   );
 }
 
-export const App = () => {
+const Componente  = () => {
+  const {valor , toggle} = useContext(Contexto);
+  return(
+    <div>
+      <label >{valor.toString()}</label>
+      <button onClick={toggle}> toggle </button>
+    </div>
+  );
+}
+
+function App() {
   return (
     <MiProvider>
-      <Contenido />
-      <Contenido2 />
+      <Componente />
     </MiProvider>
   )
 }
+
+export default App

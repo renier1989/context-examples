@@ -1,63 +1,36 @@
-/* eslint-disable react/display-name */
-import { createContext, memo, useCallback, useContext, useState } from "react"
+import { Component, createContext } from "react";
 
-const Contexto = createContext();
+const Contexto = createContext("valor por defecto");
 
-const MiProvider = ({children}) => {
-  const [contador , setContador] = useState(0)
-
-  // aqui se intenta aplicar la optimizacion para evitar el re-render de la funciones que son las que actuializan constantemente el estado de la propiedad valor
-  const incrementar = useCallback(()=>setContador(x => x + 1), []);
-  const decrementar = useCallback(()=>setContador(x=>x - 1),[]);
-
+const MiProvider = ({ children }) => {
   return (
-    <Contexto.Provider value={{contador, incrementar, decrementar}}>
-      {children}
-    </Contexto.Provider>
-  )
+  <Contexto.Provider value={'otro valor.'}>{children}</Contexto.Provider>
+  );
+};
+
+
+class Componente extends Component {
+    //  // esta es una forma de acceder al contexto en un componente creado como clase se debe usar estrictametne la palabra contextType = <nombre del contexto>
+    //  static contextType = Contexto
+  render() {
+    // console.log(this.context);
+    return <div>Hola mundo</div>;
+  }
 }
 
-// aqui se intenta optimizar con memo el componente para igualmente evitar el re-rendering
-const Incrementar = memo(() => {
-  const {incrementar} = useContext(Contexto)
-  console.log('Incrementar');
-  return (
-    <button onClick={incrementar}> Incrementar</button>
-  );
-})
+// esta es otra forma de poder acceder al contexto con una componente creado como clase 
+// Componente.contextType=Contexto;
 
-// aqui se intenta optimizar con memo el componente para igualmente evitar el re-rendering
-const Decrementar = memo(() => {
-  const {decrementar} = useContext(Contexto)
-  console.log('Decrementar');
-  return (
-    <button onClick={decrementar}> Decrementar</button>
-  );
-})
-
-const Title = () => {
-  const {contador } = useContext(Contexto);
-  console.log('Titulo');
-  return(
-    <h1>{contador}</h1>
-  )
-}
-
-function App() {
+const App = () =>{
   return (
     <MiProvider>
-      <Title/>
-      <br />
-      <Decrementar />
-      <Incrementar />
+      <Componente />
+      {/* esta es otra forma de poder acceder al contexto , sin necesidad de tener de el contextType o el hook de useContext  */}
+      <Contexto.Consumer>
+        {valor => <div>{valor}</div> }
+      </Contexto.Consumer>
     </MiProvider>
-  )
-}
+  );
+} 
 
-export default App
-
-//PARTE 1: "el problema" en esta version de App, se pone en evidencia el problema que tiene Contexto. que es que no se podra evitar de ninguna menera el re-render de los componentes hijos que contento el Provider.
-
-//PARTE 2: "Intento de optimizacion" en esta version se agrego la parte de la optimizacion con memo para los componentes y useCallback para las funciones e intentar memoizar la aplicacion, pero sin un resultado favorable ya que el provider simpre a estar aplicarndo re-rendering a todos los componentes hijos que este contenga. 
-
-// RECOMENTADIONES : usar la API de Context es muy util y flexible si se trata de aplicaciones muy pequeñas sin un gran inpacto sobre la aplicacion, pero para aplicacion mucho mas grandes que van a escalar con el timepo o con analisis de datos y ejecuciones de funciones muy pesadas es recomendable usar redux.
+export default App;
